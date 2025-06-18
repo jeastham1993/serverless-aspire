@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 
+**/.idea/*
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -388,3 +390,6 @@ global.json
 
 # Aspire specific
 .aspire/
+
+# Ignore macOS specific files
+.DS_Store
