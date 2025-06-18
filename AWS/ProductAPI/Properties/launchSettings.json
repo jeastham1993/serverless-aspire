@@ -1,0 +1,34 @@
+{
+  "profiles": {
+    "Aspire_ListProductsFunction": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./ProductAPI.deps.json --runtimeconfig ./ProductAPI.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.10.3/amazon.lambda.testtool/0.10.3/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll ProductAPI::ProductAPI.Api_List_Generated::List",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_GetProductFunction": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./ProductAPI.deps.json --runtimeconfig ./ProductAPI.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.10.3/amazon.lambda.testtool/0.10.3/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll ProductAPI::ProductAPI.Api_Get_Generated::Get",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_CreateProductFunction": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./ProductAPI.deps.json --runtimeconfig ./ProductAPI.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.10.3/amazon.lambda.testtool/0.10.3/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll ProductAPI::ProductAPI.Api_Create_Generated::Create",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_DeleteProductFunction": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./ProductAPI.deps.json --runtimeconfig ./ProductAPI.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.10.3/amazon.lambda.testtool/0.10.3/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll ProductAPI::ProductAPI.Api_Delete_Generated::Delete",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_HandleSQSMessageFunction": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./ProductAPI.deps.json --runtimeconfig ./ProductAPI.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.10.3/amazon.lambda.testtool/0.10.3/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll ProductAPI::ProductAPI.MessageHandlers_HandleSqsMessage_Generated::HandleSqsMessage",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    }
+  }
+}

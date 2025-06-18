@@ -1,0 +1,164 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "This template is partially managed by Amazon.Lambda.Annotations (v1.7.0.0).",
+  "Resources": {
+    "ProductAPIApiDeleteGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootDelete"
+        ],
+        "SyncedEventProperties": {
+          "RootDelete": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "ProductAPI::ProductAPI.Api_Delete_Generated::Delete",
+        "Events": {
+          "RootDelete": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/api/products/{id}",
+              "Method": "DELETE"
+            }
+          }
+        }
+      }
+    },
+    "ProductAPIApiCreateGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ],
+        "SyncedEventProperties": {
+          "RootPost": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "ProductAPI::ProductAPI.Api_Create_Generated::Create",
+        "Events": {
+          "RootPost": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/api/products",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    "ProductAPIApiListGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "ProductAPI::ProductAPI.Api_List_Generated::List",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/api/products",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "ProductAPIApiGetGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "ProductAPI::ProductAPI.Api_Get_Generated::Get",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/api/products/{id}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "ProductAPIMessageHandlersHandleSqsMessageGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations"
+      },
+      "Properties": {
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "ProductAPI::ProductAPI.MessageHandlers_HandleSqsMessage_Generated::HandleSqsMessage"
+      }
+    }
+  }
+}
