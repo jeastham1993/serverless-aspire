@@ -12,9 +12,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Amazon.Lambda.SQSEvents" Version="2.2.0" />
         <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1" />
-        <PackageReference Include="Aspire.Hosting.AWS" Version="9.2.3" />
-        <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.1.6" />
+        <PackageReference Include="Aspire.Hosting.AWS" Version="9.2.4" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.1.9" />
+        <PackageReference Include="AWSSDK.Lambda" Version="4.0.1.1" />
     </ItemGroup>
 
     <ItemGroup>

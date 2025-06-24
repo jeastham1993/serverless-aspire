@@ -143,7 +143,7 @@
         }
       }
     },
-    "ProductAPIMessageHandlersHandleSqsMessageGenerated": {
+    "ProductAPIProductRestockedEventHandlerHandleGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations"
@@ -157,7 +157,24 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "ProductAPI::ProductAPI.MessageHandlers_HandleSqsMessage_Generated::HandleSqsMessage"
+        "Handler": "ProductAPI::ProductAPI.ProductRestockedEventHandler_Handle_Generated::Handle"
+      }
+    },
+    "ProductAPIProductPurchasedEventHandlerHandleGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations"
+      },
+      "Properties": {
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "ProductAPI::ProductAPI.ProductPurchasedEventHandler_Handle_Generated::Handle"
       }
     }
   }

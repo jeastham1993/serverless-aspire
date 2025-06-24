@@ -1,14 +1,14 @@
 ﻿namespace ProductAPI.ProductManagement
 {
-    public class Product
+    public sealed class Product
     {
-        public Product()
+        internal Product()
         {
             Id = string.Empty;
             Name = string.Empty;
         }
 
-        public Product(string id, string name, decimal price)
+        internal Product(string id, string name, decimal price)
         {
             Id = id;
             Name = name;
@@ -25,19 +25,34 @@
         public string Name { get; set; }
         
         public decimal Price { get; private set; }
+        
+        public decimal PurchaseCount { get; private set; }
+        
+        public decimal StockLevel { get; private set; }
 
         public void SetPrice(decimal newPrice)
         {
             Price = Math.Round(newPrice, 2);
         }
 
-        public override string ToString()
+        public void Restock(decimal newStockLevel)
         {
-            return "Product{" +
-                   "id='" + Id + '\'' +
-                   ", name='" + Name + '\'' +
-                   ", price=" + Price +
-                   '}';
+            if (newStockLevel < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newStockLevel), "Stock level cannot be negative.");
+            }
+            StockLevel = Math.Round(newStockLevel, 2);
+        }
+
+        public void ProductPurchased(string orderNumber)
+        {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+            {
+                throw new ArgumentException("Order number cannot be null or empty.", nameof(orderNumber));
+            }
+            // This is a naive implementation for demonstration purposes, in a real application you would
+            // likely want to track orders in a more sophisticated way to make sure the same order isn't counted twice.
+            PurchaseCount++;
         }
     }
 }

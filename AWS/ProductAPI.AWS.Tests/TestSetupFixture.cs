@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Amazon.Lambda;
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
@@ -8,6 +9,13 @@ public class TestSetupFixture : IDisposable
 {
     public ApiDriver ApiDriver { get; init; }
     public DistributedApplication? App { get; init; }
+
+    public JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
 
     public TestSetupFixture()
     {

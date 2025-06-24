@@ -42,7 +42,7 @@ public class Api(IProducts products)
             
             var product = await products.AddNew(new ProductName(request.Name), new ProductPrice(request.Price));
 
-            return HttpResults.Created($"/products/{product.Id}");
+            return HttpResults.Created($"/products/{product.Id}", product);
         }
         catch (ArgumentNullException e)
         {

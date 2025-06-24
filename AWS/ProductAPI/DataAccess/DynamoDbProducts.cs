@@ -38,6 +38,13 @@ namespace ProductAPI.DataAccess
             });
         }
 
+        public async Task Update(Product product)
+        {
+            ArgumentNullException.ThrowIfNull(product, nameof(product));
+            
+            await dynamoDbClient.PutItemAsync(configuration["PRODUCT_TABLE_NAME"], ProductMapper.ProductToDynamoDb(product));
+        }
+
         public async Task<ProductWrapper> All()
         {
             var data = await dynamoDbClient.ScanAsync(new ScanRequest()

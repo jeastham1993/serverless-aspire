@@ -4,6 +4,7 @@ using Amazon.Runtime;
 using Aspire.Hosting.AWS.DynamoDB;
 using Aspire.Hosting.AWS.Lambda;
 using Projects;
+using Serverless.Aspire.AWS;
 
 #pragma warning disable CA2252 // Opt in to preview features
 
@@ -21,7 +22,7 @@ builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (ev
     var credentials = new BasicAWSCredentials("dummyaccesskey", "dummysecretkey");
     var ddbClient = new AmazonDynamoDBClient(new AmazonDynamoDBConfig
         { ServiceURL = serviceUrl, DefaultAWSCredentials = credentials });
-    
+
     // Create the Accounts table.
     await ddbClient.CreateTableAsync(new CreateTableRequest
     {
@@ -68,10 +69,26 @@ var deleteProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("DeleteProd
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
-var handleSqsFunction = builder.AddAWSLambdaFunction<ProductAPI>("HandleSQSMessageFunction",
-        "ProductAPI::ProductAPI.MessageHandlers_HandleSqsMessage_Generated::HandleSqsMessage")
+
+var lambdaServiceEmulator = builder.Resources.FirstOrDefault(resource => resource.Name == "LambdaServiceEmulator")!;
+
+var productRestockedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("ProductRestockedEventHandler",
+        "ProductAPI::ProductAPI.ProductRestockedEventHandler_Handle_Generated::Handle")
     .WaitFor(dynamoDbLocal)
     .WithReference(dynamoDbLocal)
+    .WithLambdaTestCommands(lambdaServiceEmulator,
+        new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.v1", "ProductRestockedEventHandler",
+            new ProductRestockedTestMessage("testproduct", 100)))
+    .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
+    .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
+    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+var productPurchasedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("ProductPurchasedEventHandler",
+        "ProductAPI::ProductAPI.ProductPurchasedEventHandler_Handle_Generated::Handle")
+    .WaitFor(dynamoDbLocal)
+    .WithReference(dynamoDbLocal)
+    .WithLambdaTestCommands(lambdaServiceEmulator,
+        new LambdaTestSqsMessage<ProductPurchasedTestMessage>("product.restocked.v1", "ProductPurchasedEventHandler",
+            new ProductPurchasedTestMessage("testproduct","ordernumber")))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
@@ -82,6 +99,5 @@ builder.AddAWSAPIGatewayEmulator("APIGatewayEmulator", APIGatewayType.HttpV2)
     .WithReference(getProductLambdaFunction, Method.Get, "/api/products/{id}")
     .WithReference(createProductFunction, Method.Post, "/api/products")
     .WithReference(deleteProductFunction, Method.Delete, "/api/products/{id}");
-
 
 await builder.Build().RunAsync();
