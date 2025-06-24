@@ -1,12 +1,23 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
+using Azure.Messaging.ServiceBus;
 
 namespace ProductAPI.AzureFunctions.Tests;
 
+[SuppressMessage("Reliability", "CA2012:Use ValueTasks correctly")]
 public class TestSetupFixture : IDisposable
 {
     public ApiDriver ApiDriver { get; }
     public DistributedApplication? App { get; }
+
+    public JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
 
     public TestSetupFixture()
     {
@@ -26,7 +37,7 @@ public class TestSetupFixture : IDisposable
             .GetAwaiter().GetResult();
         
         var httpClient = App.CreateHttpClient("functions", "http");
-        ApiDriver = new ApiDriver(httpClient);
+        ApiDriver = new ApiDriver(httpClient, new ServiceBusClient(App.GetConnectionStringAsync("messaging").GetAwaiter().GetResult()));
         
         // Ensure the API is ready before running tests
         var retryCount = 0;

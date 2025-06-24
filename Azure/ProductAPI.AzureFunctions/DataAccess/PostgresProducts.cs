@@ -25,6 +25,17 @@ internal sealed class PostgresProducts(ProductDbContext dbContext) : IProducts
         return product;
     }
 
+    public async Task Update(Product product)
+    {
+        if (product == null)
+        {
+            throw new ArgumentNullException(nameof(product), "Product cannot be null.");
+        }
+
+        dbContext.Products.Update(product);
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task Delete(string id)
     {
         var product = await WithId(id);

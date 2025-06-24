@@ -8,13 +8,14 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsAspireHost>true</IsAspireHost>
-        <UserSecretsId>f21d3039-701e-4cd1-9ff2-937c2e553ba7</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1" />
         <PackageReference Include="Aspire.Hosting.Azure.Functions" Version="9.3.1-preview.1.25305.6" />
         <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.3.0" />
+        <PackageReference Include="Aspire.Hosting.Azure.ServiceBus" Version="9.3.0" />
+        <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.19.0" />
     </ItemGroup>
 
     <ItemGroup>

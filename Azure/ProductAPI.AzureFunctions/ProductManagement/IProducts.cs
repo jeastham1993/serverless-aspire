@@ -5,6 +5,8 @@
         Task<Product?> WithId(string id);
 
         Task<Product> New(ProductName name, ProductPrice price);
+        
+        Task Update(Product product);
 
         Task Delete(string id);
 

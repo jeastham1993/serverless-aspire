@@ -17,7 +17,8 @@ namespace ProductAPI.AzureFunctions.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    OrderCount = table.Column<string>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {

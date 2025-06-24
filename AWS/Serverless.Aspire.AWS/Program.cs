@@ -21,7 +21,7 @@ builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (ev
     var credentials = new BasicAWSCredentials("dummyaccesskey", "dummysecretkey");
     var ddbClient = new AmazonDynamoDBClient(new AmazonDynamoDBConfig
         { ServiceURL = serviceUrl, DefaultAWSCredentials = credentials });
-
+    
     // Create the Accounts table.
     await ddbClient.CreateTableAsync(new CreateTableRequest
     {
