@@ -1,3 +1,4 @@
+using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
@@ -5,13 +6,40 @@ using Aspire.Hosting.AWS.DynamoDB;
 using Aspire.Hosting.AWS.Lambda;
 using Projects;
 using Serverless.Aspire.AWS;
+using Serverless.Aspire.AWS.Localstack;
 
 #pragma warning disable CA2252 // Opt in to preview features
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var awsConfig = builder.AddAWSSDKConfig()
+    .WithProfile("aspire")
+    .WithRegion(RegionEndpoint.USWest2);
+
+var localStackOptions = builder.AddLocalStackConfig();
+
+var localStack = builder
+    .AddLocalStack("localstack", localStackOptions);
+
 var dynamoDbLocal = builder
-    .AddAWSDynamoDBLocal("DynamoDBProducts");
+    .AddAWSDynamoDBLocal("DynamoDBProducts") ;
+
+var cdkBootstrap = builder.AddAWSCloudFormationTemplate("CDKBootstrap", "cdk-bootstrap.template")
+    .WaitFor(localStack)
+    .WithReference(awsConfig)
+    .WithLocalStack(localStackOptions);
+
+var cdkStack = builder.AddAWSCDKStack("ProductCDKStack")
+    .WaitFor(localStack)
+    .WaitFor(cdkBootstrap)
+    .WithReference(awsConfig)
+    .WithLocalStack(localStackOptions);
+var topic = cdkStack.AddSNSTopic("MyTopic");
+
+var awsResources = builder.AddAWSCloudFormationTemplate("AWSResources", "aws-resources.template")
+    .WaitFor(localStack)
+    .WithReference(awsConfig)
+    .WithLocalStack(localStackOptions);
 
 builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (evnt, ct) =>
 {
@@ -44,28 +72,51 @@ builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (ev
 var listProductsLambdaFunction = builder.AddAWSLambdaFunction<ProductAPI>("ListProductsFunction",
         "ProductAPI::ProductAPI.Api_List_Generated::List")
     .WaitFor(dynamoDbLocal)
+    .WaitFor(localStack)
+    .WaitFor(awsResources)
     .WithReference(dynamoDbLocal)
+    .WithReference(awsResources)
+    .WithReference(localStack)
+    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", awsResources.ExtractOutputValueFor("ProductCreatedTopicArn"))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    
 var getProductLambdaFunction = builder.AddAWSLambdaFunction<ProductAPI>("GetProductFunction",
         "ProductAPI::ProductAPI.Api_Get_Generated::Get")
     .WaitFor(dynamoDbLocal)
+    .WaitFor(localStack)
+    .WaitFor(awsResources)
     .WithReference(dynamoDbLocal)
+    .WithReference(awsResources)
+    .WithReference(localStack)
+    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", awsResources.ExtractOutputValueFor("ProductCreatedTopicArn"))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
 var createProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("CreateProductFunction",
         "ProductAPI::ProductAPI.Api_Create_Generated::Create")
     .WaitFor(dynamoDbLocal)
+    .WaitFor(localStack)
+    .WaitFor(awsResources)
     .WithReference(dynamoDbLocal)
+    .WithReference(awsResources)
+    .WithReference(topic)
+    .WithReference(localStack)
+    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", awsResources.ExtractOutputValueFor("ProductCreatedTopicArn"))
+    .WithEnvironment("AWS_ENDPOINT_URL_SNS", localStack.GetEndpoint("http"))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey") ;
 var deleteProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("DeleteProductFunction",
         "ProductAPI::ProductAPI.Api_Delete_Generated::Delete")
     .WaitFor(dynamoDbLocal)
+    .WaitFor(localStack)
+    .WaitFor(awsResources)
     .WithReference(dynamoDbLocal)
+    .WithReference(awsResources)
+    .WithReference(localStack)
+    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", awsResources.ExtractOutputValueFor("ProductCreatedTopicArn"))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");

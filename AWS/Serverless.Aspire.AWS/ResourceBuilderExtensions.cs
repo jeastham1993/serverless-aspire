@@ -10,6 +10,7 @@ using Amazon.Lambda;
 using Amazon.Lambda.Model;
 using Amazon.Lambda.SQSEvents;
 using Amazon.Runtime;
+using Aspire.Hosting.AWS.CloudFormation;
 using Aspire.Hosting.AWS.Lambda;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,16 +28,18 @@ internal static class ResourceBuilderExtensions
     /// <param name="command">The <see cref="ServiceBusTestCommand"/> to add to the UI.</param>
     /// <returns></returns>
     internal static IResourceBuilder<LambdaProjectResource> WithLambdaTestCommands<T>(
-        this IResourceBuilder<LambdaProjectResource> builder, IResource lambdaServiceEmulatorResource, LambdaTestSqsMessage<T> command)
+        this IResourceBuilder<LambdaProjectResource> builder, IResource lambdaServiceEmulatorResource,
+        LambdaTestSqsMessage<T> command)
     {
         builder.ApplicationBuilder.Services.AddSingleton<AmazonLambdaClient>(provider =>
         {
             var endpoints = lambdaServiceEmulatorResource.TryGetEndpoints(out var endpointsList)
                 ? endpointsList
-                : throw new InvalidOperationException("Lambda service emulator does not have an HTTP endpoint configured.");
+                : throw new InvalidOperationException(
+                    "Lambda service emulator does not have an HTTP endpoint configured.");
 
             var connectionString = endpoints.FirstOrDefault()!.AllocatedEndpoint!.UriString;
-            return new AmazonLambdaClient(new BasicAWSCredentials("dummykey", "dummysecret"), new AmazonLambdaConfig()
+            return new AmazonLambdaClient(new BasicAWSCredentials("dummykey", "dummysecret"), new AmazonLambdaConfig
             {
                 ServiceURL = connectionString
             });
@@ -64,5 +67,22 @@ internal static class ResourceBuilderExtensions
         }, new CommandOptions());
 
         return builder;
+    }
+
+    internal static Func<string> ExtractOutputValueFor(this IResourceBuilder<ICloudFormationTemplateResource> builder,
+        string outputKey)
+    {
+        return () =>
+        {
+            var outputs = builder.Resource.Outputs;
+
+            if (outputs is null) return "";
+
+            var outputValue =
+                outputs.FirstOrDefault(output => output.OutputKey == "ProductCreatedTopicArn")?.OutputValue ??
+                "";
+
+            return outputValue;
+        };
     }
 }

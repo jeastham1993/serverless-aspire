@@ -17,6 +17,8 @@
         <PackageReference Include="Aspire.Hosting.AWS" Version="9.2.4" />
         <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.1.9" />
         <PackageReference Include="AWSSDK.Lambda" Version="4.0.1.1" />
+        <PackageReference Include="LocalStack.Client" Version="1.6.0" />
+        <PackageReference Include="LocalStack.Client.Extensions" Version="1.4.0" />
     </ItemGroup>
 
     <ItemGroup>
