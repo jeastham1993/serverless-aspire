@@ -13,14 +13,12 @@ namespace Serverless.Aspire.AWS.Localstack;
 
 internal static class LocalStackExtensions
 {
-    public static IResourceBuilder<T> WithLocalStack<T>(this IResourceBuilder<T> builder, ILocalStackOptions? options = null) where T : ICloudFormationTemplateResource
+    public static IResourceBuilder<T> WithLocalStack<T>(this IResourceBuilder<T> builder,
+        ILocalStackOptions? options = null) where T : ICloudFormationTemplateResource
     {
-        ILocalStackOptions localStackOptions = options ?? new LocalStackOptions();
+        var localStackOptions = options ?? new LocalStackOptions();
 
-        if (!localStackOptions.UseLocalStack)
-        {
-            return builder;
-        }
+        if (!localStackOptions.UseLocalStack) return builder;
 
         var amazonCloudFormationClient = SessionStandalone.Init()
             .WithSessionOptions(localStackOptions.Session)

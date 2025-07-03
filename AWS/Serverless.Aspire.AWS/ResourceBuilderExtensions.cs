@@ -3,6 +3,7 @@
 // Copyright 2025 Datadog, Inc.
 
 #pragma warning disable CA1812
+#pragma warning disable CA1305
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
@@ -23,7 +24,6 @@ internal sealed record LambdaTestSqsMessage<T>(string QueueName, string Function
 
 internal sealed record LambdaCommonReferences(
     IResourceBuilder<IDynamoDBLocalResource> DynamoDbLocal,
-    IResourceBuilder<ICloudFormationTemplateResource> AwsResources,
     IResourceBuilder<LocalStackResource> LocalStack);
 
 [SuppressMessage("Reliability", "CA2012:Use ValueTasks correctly")]
@@ -84,7 +84,6 @@ internal static class ResourceBuilderExtensions
             .WaitFor(commonReferences.DynamoDbLocal)
             .WaitFor(commonReferences.LocalStack)
             .WithReference(commonReferences.DynamoDbLocal)
-            .WithReference(commonReferences.AwsResources)
             .WithReference(commonReferences.LocalStack)
             .WithEnvironment("AWS_ENDPOINT_URL_SNS", () => commonReferences.LocalStack.GetEndpoint("http").Url)
             .WithEnvironment("PRODUCT_TABLE_NAME", "Products")

@@ -5,6 +5,7 @@ using System.Text.Json;
 using Amazon.Lambda.Annotations;
 using Amazon.Lambda.SQSEvents;
 using AWS.Lambda.Powertools.Logging;
+using Datadog.Trace;
 using Microsoft.Extensions.Logging;
 using ProductAPI.ProductManagement;
 
@@ -28,33 +29,29 @@ internal sealed class ProductPurchasedEventHandler(IProducts products)
         ArgumentNullException.ThrowIfNull(sqsEvent, nameof(sqsEvent));
 
         var failures = new List<SQSBatchResponse.BatchItemFailure>();
-        
+
         foreach (var message in sqsEvent.Records)
         {
+            using var processTrace = Tracer.Instance.StartActive($"process product.reStocked.v1");
+
             try
             {
                 var messageBody = JsonSerializer.Deserialize<ProductPurchasedEvent>(message.Body, _options);
-            
-                if (messageBody is null)
-                {
-                    throw new ArgumentException("Message body is null or invalid.");
-                }
-            
+
+                if (messageBody is null) throw new ArgumentException("Message body is null or invalid.");
+
                 var product = await products.WithId(messageBody.ProductId);
-            
-                if (product is null)
-                {
-                    throw new ArgumentException($"Product with ID {messageBody.ProductId} not found.");
-                }
-            
+
+                if (product is null) throw new ArgumentException($"Product with ID {messageBody.ProductId} not found.");
+
                 product.ProductPurchased(messageBody.OrderNumber);
-            
+
                 await products.Update(product);
             }
             catch (ArgumentOutOfRangeException ex)
             {
                 Logger.LogError(ex, "An error occured while processing message.");
-                failures.Add(new  SQSBatchResponse.BatchItemFailure()
+                failures.Add(new SQSBatchResponse.BatchItemFailure
                 {
                     ItemIdentifier = message.MessageId
                 });
@@ -62,7 +59,7 @@ internal sealed class ProductPurchasedEventHandler(IProducts products)
             catch (ArgumentException ex)
             {
                 Logger.LogError(ex, "An error occured while processing message.");
-                failures.Add(new  SQSBatchResponse.BatchItemFailure()
+                failures.Add(new SQSBatchResponse.BatchItemFailure
                 {
                     ItemIdentifier = message.MessageId
                 });

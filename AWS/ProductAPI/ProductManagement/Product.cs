@@ -15,6 +15,15 @@
             Price = price;
         }
 
+        internal Product(string id, string name, decimal price, decimal stockLevel, decimal purchaseCount)
+        {
+            Id = id;
+            Name = name;
+            Price = price;
+            StockLevel = stockLevel;
+            PurchaseCount = purchaseCount;
+        }
+
         internal static Product Create(ProductName name, ProductPrice price)
         {
             return new Product(name.Value.ToUpperInvariant().Replace(" ", "", StringComparison.OrdinalIgnoreCase), name.Value, price.Value);

@@ -6,6 +6,7 @@ using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using AWS.Lambda.Powertools.Logging;
+using Datadog.Trace;
 using Microsoft.Extensions.Logging;
 using ProductAPI.ProductManagement;
 
@@ -32,6 +33,8 @@ internal sealed class ProductRestockedEventHandler(IProducts products)
         
         foreach (var message in sqsEvent.Records)
         {
+            using var processTrace = Tracer.Instance.StartActive($"process product.reStocked.v1");
+            
             try
             {
                 var messageBody = JsonSerializer.Deserialize<ProductRestockedEvent>(message.Body, _options);

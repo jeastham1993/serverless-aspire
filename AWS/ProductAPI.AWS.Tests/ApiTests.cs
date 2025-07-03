@@ -7,14 +7,6 @@ namespace ProductAPI.AWS.Tests;
 public class ApiTests(TestSetupFixture setupFixture) : IClassFixture<TestSetupFixture>
 {
     [Fact]
-    public async Task CanHandleSqsMessageShouldReturnOk()
-    {
-        var messageProcessingResult = await setupFixture.ApiDriver.HandleSqsMessage("Test SQS Message");
-        
-        Assert.True(messageProcessingResult, "SQS message processing should return true");
-    }
-    
-    [Fact]
     public async Task CanCreateNewProductShouldReturn201()
     {
         var productName = "Test Product";

@@ -2,7 +2,8 @@ using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.Core;
 using AWS.Lambda.Powertools.Logging;
-using ProductAPI.DataAccess;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using ProductAPI.ProductManagement;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -17,6 +18,8 @@ public class Api(IProducts products, IProductMessaging messaging)
     {
         try
         {
+            using var handlerTrace = Tracer.Instance.StartActive("ProductAPI.DeleteProduct");
+            
             var product = await products.WithId(id);
 
             if (product == null) return HttpResults.NotFound("Not found");
@@ -38,6 +41,8 @@ public class Api(IProducts products, IProductMessaging messaging)
     {
         try
         {
+            using var handlerTrace = Tracer.Instance.StartActive("ProductAPI.CreateProduct");
+            
             ArgumentNullException.ThrowIfNull(request, nameof(request));
             
             var product = await products.AddNew(new ProductName(request.Name), new ProductPrice(request.Price));
@@ -56,6 +61,8 @@ public class Api(IProducts products, IProductMessaging messaging)
     [HttpApi(LambdaHttpMethod.Get, "/api/products")]
     public async Task<IHttpResult> List()
     {
+        using var handlerTrace = Tracer.Instance.StartActive("ProductAPI.ListProducts");
+        
         var products1 = await products.All();
 
         return HttpResults.Ok(products1);
@@ -67,6 +74,8 @@ public class Api(IProducts products, IProductMessaging messaging)
     {
         try
         {
+            using var handlerTrace = Tracer.Instance.StartActive("ProductAPI.GetProduct");
+            
             var product = await products.WithId(id);
 
             if (product == null) return HttpResults.NotFound("Not found");

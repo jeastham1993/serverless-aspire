@@ -393,3 +393,6 @@ global.json
 
 # Ignore macOS specific files
 .DS_Store
+
+
+**/appsettings.Development.json
