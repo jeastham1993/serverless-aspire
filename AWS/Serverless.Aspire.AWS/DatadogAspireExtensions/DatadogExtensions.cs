@@ -75,7 +75,7 @@ internal static class DatadogExtensions
 
                 if (!File.Exists(profilingFilePath))
                     throw new ArgumentException(
-                        $"Could not find the Linux profiling API at {profilingFilePath}, please ensure you have added the `Datadog.Trace.Bundle` package to your Aspire AppHost project and");
+                        $"Could not find the Linux profiling API at {profilingFilePath}. Please ensure you have added the `Datadog.Trace.Bundle` package to your Aspire AppHost project and verify that the required files are present in the expected directory.");
 
                 builder.WithEnvironment("LD_PRELOAD", profilingFilePath);
             }
