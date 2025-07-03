@@ -50,11 +50,11 @@ internal static class DatadogExtensions
 
         if (!Directory.Exists(tracerDirectoryPath))
             throw new ArgumentException(
-                $"Could not find Datadog tracer directory at {tracerDirectoryPath}, please ensure you have added the `Datadog.Trace.Bundle` package to your Aspire AppHost project and");
+                $"Could not find Datadog tracer directory at {tracerDirectoryPath}. Please ensure you have added the `Datadog.Trace.Bundle` package to your Aspire AppHost project and verify that the directory exists.");
 
         if (!File.Exists(profilerFilePath))
             throw new ArgumentException(
-                $"Could not find the Datadog profiler at {profilerFilePath}, please ensure you have added the `Datadog.Trace.Bundle` package to your Aspire AppHost project and");
+                $"Could not find the Datadog profiler at {profilerFilePath}. Please ensure you have added the `Datadog.Trace.Bundle` package to your Aspire AppHost project and verify that the profiler file exists.");
 
         builder.WithEnvironment("CORECLR_ENABLE_PROFILING", "1")
             .WithEnvironment("CORECLR_PROFILER", "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}")
