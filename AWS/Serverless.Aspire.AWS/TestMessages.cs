@@ -6,6 +6,6 @@
 
 namespace Serverless.Aspire.AWS;
 
-internal sealed record ProductRestockedTestMessage(string ProductId, int NewStockLevel);
+internal sealed record ProductRestockedTestMessage(string? ProductId, int NewStockLevel);
 
 internal sealed record ProductPurchasedTestMessage(string ProductId, string OrderNumber);
