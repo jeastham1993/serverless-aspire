@@ -28,7 +28,7 @@ public class TestSetupFixture : IDisposable
             .GetAwaiter()
             .GetResult();
         builder.Configuration
-            .AddJsonFile("appsettings.development.json", optional: false, reloadOnChange: false)
+            .AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: false)
             .AddEnvironmentVariables();
         
         App = builder
