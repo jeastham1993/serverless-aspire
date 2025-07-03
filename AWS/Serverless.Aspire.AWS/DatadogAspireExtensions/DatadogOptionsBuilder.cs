@@ -20,19 +20,19 @@ internal sealed class DatadogOptionsBuilder
         options.DDSite = ddSite;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithServiceName(string serviceName)
     {
         options.ServiceName = serviceName;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithEnvironment(string environment)
     {
         options.Environment = environment;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithVersion(string version)
     {
         options.Version = version;
@@ -44,37 +44,37 @@ internal sealed class DatadogOptionsBuilder
         options.EnableLogs = true;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithAPM()
     {
         options.EnableAPM = true;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithDogStatsD()
     {
         options.EnableDogStatsD = true;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithRuntimeMetrics()
     {
         options.EnableRuntimeMetrics = true;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithProfiling()
     {
         options.EnableProfiling = true;
         return this;
     }
-    
+
     public DatadogOptionsBuilder WithOTELEndpoints()
     {
         options.EnaleOTELEndpoints = true;
         return this;
     }
-    
+
     public DatadogOptions Build()
     {
         return options;
