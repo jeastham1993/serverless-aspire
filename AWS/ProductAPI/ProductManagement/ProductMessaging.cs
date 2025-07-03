@@ -7,4 +7,6 @@ namespace ProductAPI.ProductManagement;
 public interface IProductMessaging
 {
     Task PublishProductCreated(string productId);
+    
+    Task PublishProductDeleted(string productId);
 }

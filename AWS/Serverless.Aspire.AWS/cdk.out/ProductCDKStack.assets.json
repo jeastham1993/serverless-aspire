@@ -1,0 +1,20 @@
+{
+  "version": "41.0.0",
+  "files": {
+    "beaf04a8f3b8d018ec65c9cf08df5a8cec1119983e97a6b94fa8e9d8bb64818b": {
+      "displayName": "ProductCDKStack Template",
+      "source": {
+        "path": "ProductCDKStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "beaf04a8f3b8d018ec65c9cf08df5a8cec1119983e97a6b94fa8e9d8bb64818b.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
