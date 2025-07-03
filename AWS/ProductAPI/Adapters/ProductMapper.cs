@@ -30,7 +30,7 @@ public static class ProductMapper
     public static Dictionary<string, AttributeValue> ProductToDynamoDb(Product product)
     {
         ArgumentNullException.ThrowIfNull(product, nameof(product));
-        var item = new Dictionary<string, AttributeValue>(3);
+        var item = new Dictionary<string, AttributeValue>(5);
         item.Add(Pk, new AttributeValue(product.Id));
         item.Add(Name, new AttributeValue(product.Name));
         item.Add(Price, new AttributeValue
