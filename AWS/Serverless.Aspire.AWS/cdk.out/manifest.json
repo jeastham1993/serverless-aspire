@@ -1,0 +1,95 @@
+{
+  "version": "41.0.0",
+  "artifacts": {
+    "ProductCDKStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "ProductCDKStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "ProductCDKStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "ProductCDKStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/beaf04a8f3b8d018ec65c9cf08df5a8cec1119983e97a6b94fa8e9d8bb64818b.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "ProductCDKStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "ProductCDKStack.assets"
+      ],
+      "metadata": {
+        "/ProductCDKStack/ProductCreatedTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductCreatedTopic60B4A23D"
+          }
+        ],
+        "/ProductCDKStack/ProductDeletedTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductDeletedTopic4EF248E9"
+          }
+        ],
+        "/ProductCDKStack/ProductCreatedTopicBAD3260FProductCreatedTopicArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductCreatedTopicBAD3260FProductCreatedTopicArn"
+          }
+        ],
+        "/ProductCDKStack/ProductCreatedTopicBAD3260FTopicArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductCreatedTopicBAD3260FTopicArn"
+          }
+        ],
+        "/ProductCDKStack/ProductDeletedTopic58F024DDProductDeletedTopicArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductDeletedTopic58F024DDProductDeletedTopicArn"
+          }
+        ],
+        "/ProductCDKStack/ProductDeletedTopic58F024DDTopicArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductDeletedTopic58F024DDTopicArn"
+          }
+        ],
+        "/ProductCDKStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/ProductCDKStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "ProductCDKStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

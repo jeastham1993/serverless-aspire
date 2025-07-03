@@ -1,3 +1,4 @@
+using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
@@ -5,13 +6,44 @@ using Aspire.Hosting.AWS.DynamoDB;
 using Aspire.Hosting.AWS.Lambda;
 using Projects;
 using Serverless.Aspire.AWS;
+using Serverless.Aspire.AWS.Localstack;
 
 #pragma warning disable CA2252 // Opt in to preview features
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var awsConfig = builder.AddAWSSDKConfig()
+    .WithProfile("aspire")
+    .WithRegion(RegionEndpoint.USWest2);
+
+var localStackOptions = builder.AddLocalStackConfig();
+
+var localStack = builder
+    .AddLocalStack("localstack", localStackOptions);
+
 var dynamoDbLocal = builder
     .AddAWSDynamoDBLocal("DynamoDBProducts");
+
+// Bootstrap the CDK environment against LocalStack.
+var cdkBootstrap = builder.AddAWSCloudFormationTemplate("CDKBootstrap", "cdk-bootstrap.template")
+    .WaitFor(localStack)
+    .WithReference(awsConfig)
+    .WithLocalStack(localStackOptions);
+
+var cdkStack = builder.AddAWSCDKStack("ProductCDKStack")
+    .WaitFor(localStack)
+    .WaitFor(cdkBootstrap)
+    .WithReference(awsConfig)
+    .WithLocalStack(localStackOptions);
+var createdTopic = cdkStack.AddSNSTopic("ProductCreatedTopic")
+    .AddOutput("ProductCreatedTopicArn", construct => construct.TopicArn);
+var deletedTopic = cdkStack.AddSNSTopic("ProductDeletedTopic")
+    .AddOutput("ProductDeletedTopicArn", construct => construct.TopicArn);
+
+var awsResources = builder.AddAWSCloudFormationTemplate("AWSResources", "aws-resources.template")
+    .WaitFor(localStack)
+    .WithReference(awsConfig)
+    .WithLocalStack(localStackOptions);
 
 builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (evnt, ct) =>
 {
@@ -41,34 +73,27 @@ builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (ev
     Console.WriteLine($"Table created");
 });
 
+var lambdaCommonReferences = new LambdaCommonReferences(dynamoDbLocal, awsResources, localStack);
+
 var listProductsLambdaFunction = builder.AddAWSLambdaFunction<ProductAPI>("ListProductsFunction",
         "ProductAPI::ProductAPI.Api_List_Generated::List")
-    .WaitFor(dynamoDbLocal)
-    .WithReference(dynamoDbLocal)
-    .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
-    .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithCommonReferences(lambdaCommonReferences);
+
 var getProductLambdaFunction = builder.AddAWSLambdaFunction<ProductAPI>("GetProductFunction",
         "ProductAPI::ProductAPI.Api_Get_Generated::Get")
-    .WaitFor(dynamoDbLocal)
-    .WithReference(dynamoDbLocal)
-    .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
-    .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithCommonReferences(lambdaCommonReferences);
 var createProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("CreateProductFunction",
         "ProductAPI::ProductAPI.Api_Create_Generated::Create")
-    .WaitFor(dynamoDbLocal)
-    .WithReference(dynamoDbLocal)
-    .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
-    .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithCommonReferences(lambdaCommonReferences)
+    // Example of using CloudFormation resource instead of LocalStack resource.
+    //.WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", awsResources.ExtractOutputValueFor("ProductCreatedTopicArn"))
+    .WithReference(createdTopic)
+    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", cdkStack.ExtractOutputValueFor("ProductCreatedTopicArn"));
 var deleteProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("DeleteProductFunction",
         "ProductAPI::ProductAPI.Api_Delete_Generated::Delete")
-    .WaitFor(dynamoDbLocal)
-    .WithReference(dynamoDbLocal)
-    .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
-    .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithCommonReferences(lambdaCommonReferences)
+    .WithReference(deletedTopic)
+    .WithEnvironment("PRODUCT_DELETED_TOPIC_ARN", cdkStack.ExtractOutputValueFor("ProductDeletedTopicArn"));
 
 var lambdaServiceEmulator = builder.Resources.FirstOrDefault(resource => resource.Name == "LambdaServiceEmulator")!;
 
@@ -94,7 +119,7 @@ var productPurchasedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("Pro
     .WithReference(dynamoDbLocal)
     .WithLambdaTestCommands(lambdaServiceEmulator,
         new LambdaTestSqsMessage<ProductPurchasedTestMessage>("product.restocked.v1", "ProductPurchasedEventHandler",
-            new ProductPurchasedTestMessage("testproduct","ordernumber")))
+            new ProductPurchasedTestMessage("testproduct", "ordernumber")))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");

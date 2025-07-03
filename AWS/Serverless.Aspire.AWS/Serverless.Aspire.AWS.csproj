@@ -14,9 +14,11 @@
     <ItemGroup>
         <PackageReference Include="Amazon.Lambda.SQSEvents" Version="2.2.0" />
         <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1" />
-        <PackageReference Include="Aspire.Hosting.AWS" Version="9.2.4" />
-        <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.1.9" />
-        <PackageReference Include="AWSSDK.Lambda" Version="4.0.1.1" />
+        <PackageReference Include="Aspire.Hosting.AWS" Version="9.2.5" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.2.1" />
+        <PackageReference Include="AWSSDK.Lambda" Version="4.0.1.2" />
+        <PackageReference Include="LocalStack.Client" Version="1.6.0" />
+        <PackageReference Include="LocalStack.Client.Extensions" Version="1.4.0" />
     </ItemGroup>
 
     <ItemGroup>

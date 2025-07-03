@@ -1,0 +1,17 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+    },
+    "Resources" : {
+        "ProductCreatedTopic" : {
+            "Type" : "AWS::SNS::Topic",
+            "Properties" : {
+            }
+        }
+    },
+    "Outputs": {
+        "ProductCreatedTopicArn" : {
+            "Value" : { "Ref" : "ProductCreatedTopic" }
+        }
+    }
+}

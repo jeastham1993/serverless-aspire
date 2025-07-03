@@ -9,7 +9,7 @@ using ProductAPI.ProductManagement;
 
 namespace ProductAPI;
 
-public class Api(IProducts products)
+public class Api(IProducts products, IProductMessaging messaging)
 {
     [LambdaFunction]
     [HttpApi(LambdaHttpMethod.Delete, "/api/products/{id}")]
@@ -41,6 +41,7 @@ public class Api(IProducts products)
             ArgumentNullException.ThrowIfNull(request, nameof(request));
             
             var product = await products.AddNew(new ProductName(request.Name), new ProductPrice(request.Price));
+            await messaging.PublishProductCreated(product.Id);
 
             return HttpResults.Created($"/products/{product.Id}", product);
         }

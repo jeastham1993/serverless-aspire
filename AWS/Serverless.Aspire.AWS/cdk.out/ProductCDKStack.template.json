@@ -1,0 +1,66 @@
+{
+ "Resources": {
+  "ProductCreatedTopic60B4A23D": {
+   "Type": "AWS::SNS::Topic"
+  },
+  "ProductDeletedTopic4EF248E9": {
+   "Type": "AWS::SNS::Topic"
+  }
+ },
+ "Outputs": {
+  "ProductCreatedTopicBAD3260FProductCreatedTopicArn": {
+   "Value": {
+    "Ref": "ProductCreatedTopic60B4A23D"
+   }
+  },
+  "ProductCreatedTopicBAD3260FTopicArn": {
+   "Value": {
+    "Ref": "ProductCreatedTopic60B4A23D"
+   }
+  },
+  "ProductDeletedTopic58F024DDProductDeletedTopicArn": {
+   "Value": {
+    "Ref": "ProductDeletedTopic4EF248E9"
+   }
+  },
+  "ProductDeletedTopic58F024DDTopicArn": {
+   "Value": {
+    "Ref": "ProductDeletedTopic4EF248E9"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
