@@ -79,6 +79,9 @@ var productRestockedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("Pro
     .WithLambdaTestCommands(lambdaServiceEmulator,
         new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.v1", "ProductRestockedEventHandler",
             new ProductRestockedTestMessage("testproduct", 100)))
+    .WithLambdaTestCommands(lambdaServiceEmulator,
+        new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.invalid.v1", "ProductRestockedEventHandler",
+            new ProductRestockedTestMessage("testproduct", 100)))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
     .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
