@@ -21,17 +21,18 @@ internal static class LocalStackResourceExtensions
     public static ILocalStackOptions AddLocalStackConfig(this IDistributedApplicationBuilder builder)
     {
         // check if the localstack section is present in the configuration
-        IConfigurationSection? localStackSection = builder.Configuration.GetSection(LocalStackSectionName);
+        var localStackSection = builder.Configuration.GetSection(LocalStackSectionName);
 
         // if the section is not present, return default options
         if (!localStackSection.Exists())
-        {
-            return new LocalStackOptions();
-        }
-
+            throw new ArgumentException(
+                "LocalStack section is not present in the configuration. Please add a LocalStack section to the configuration.");
+        //return new LocalStackOptions();
         // if the section is present, bind the section to the options
-        var options = new LocalStackOptions();
+        var options = new LocalStackOptions(true, new SessionOptions(), new ConfigOptions(edgePort: 4566));
         localStackSection.Bind(options, c => c.BindNonPublicProperties = true);
+
+        if (!options.UseLocalStack) throw new ArgumentException("Use local stack not set.");
 
         return options;
     }
@@ -77,8 +78,9 @@ internal static class LocalStackResourceExtensions
     /// <returns></returns>
     public static ILocalStackOptions WithLocalStackHost(this ILocalStackOptions options, string localStackHost)
     {
-        ConfigOptions optionsConfig = options.Config;
-        var configOptions = new ConfigOptions(localStackHost, optionsConfig.UseSsl, optionsConfig.UseSsl, optionsConfig.EdgePort);
+        var optionsConfig = options.Config;
+        var configOptions = new ConfigOptions(localStackHost, optionsConfig.UseSsl, optionsConfig.UseSsl,
+            optionsConfig.EdgePort);
 
         return new LocalStackOptions(options.UseLocalStack, options.Session, configOptions);
     }
@@ -91,8 +93,9 @@ internal static class LocalStackResourceExtensions
     /// <returns></returns>
     public static ILocalStackOptions WithUseSsl(this ILocalStackOptions options, bool useSsl)
     {
-        ConfigOptions optionsConfig = options.Config;
-        var configOptions = new ConfigOptions(optionsConfig.LocalStackHost, useSsl, optionsConfig.UseSsl, optionsConfig.EdgePort);
+        var optionsConfig = options.Config;
+        var configOptions = new ConfigOptions(optionsConfig.LocalStackHost, useSsl, optionsConfig.UseSsl,
+            optionsConfig.EdgePort);
 
         return new LocalStackOptions(options.UseLocalStack, options.Session, configOptions);
     }
@@ -105,8 +108,9 @@ internal static class LocalStackResourceExtensions
     /// <returns></returns>
     public static ILocalStackOptions WithUseLegacyPorts(this ILocalStackOptions options, bool useLegacyPorts)
     {
-        ConfigOptions optionsConfig = options.Config;
-        var configOptions = new ConfigOptions(optionsConfig.LocalStackHost, optionsConfig.UseSsl, useLegacyPorts, optionsConfig.EdgePort);
+        var optionsConfig = options.Config;
+        var configOptions = new ConfigOptions(optionsConfig.LocalStackHost, optionsConfig.UseSsl, useLegacyPorts,
+            optionsConfig.EdgePort);
 
         return new LocalStackOptions(options.UseLocalStack, options.Session, configOptions);
     }
@@ -119,8 +123,9 @@ internal static class LocalStackResourceExtensions
     /// <returns></returns>
     public static ILocalStackOptions WithEdgePort(this ILocalStackOptions options, int edgePort)
     {
-        ConfigOptions optionsConfig = options.Config;
-        var configOptions = new ConfigOptions(optionsConfig.LocalStackHost, optionsConfig.UseSsl, optionsConfig.UseSsl, edgePort);
+        var optionsConfig = options.Config;
+        var configOptions = new ConfigOptions(optionsConfig.LocalStackHost, optionsConfig.UseSsl, optionsConfig.UseSsl,
+            edgePort);
 
         return new LocalStackOptions(options.UseLocalStack, options.Session, configOptions);
     }

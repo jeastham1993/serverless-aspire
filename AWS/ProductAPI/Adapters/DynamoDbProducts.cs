@@ -3,7 +3,7 @@ using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Configuration;
 using ProductAPI.ProductManagement;
 
-namespace ProductAPI.DataAccess
+namespace ProductAPI.Adapters
 {
     public class DynamoDbProducts(AmazonDynamoDBClient dynamoDbClient, IConfiguration configuration) : IProducts
     {

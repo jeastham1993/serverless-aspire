@@ -4,10 +4,11 @@ using Amazon.DynamoDBv2;
 using Amazon.Lambda.Annotations;
 using Amazon.SimpleNotificationService;
 using CloudNative.CloudEvents.SystemTextJson;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductAPI.Adapters;
-using ProductAPI.DataAccess;
 using ProductAPI.ProductManagement;
 
 namespace ProductAPI;
@@ -17,6 +18,15 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
+        GlobalSettings.SetDebugEnabled(true);
+        
+        Tracer.Configure(new TracerSettings
+        {
+            AgentUri = new Uri("http://localhost:8126"),
+            ServiceName = "ProductAPI",
+            Environment = "local"
+        });
+
         var configuration = new ConfigurationBuilder()
             .AddEnvironmentVariables()
             .Build();

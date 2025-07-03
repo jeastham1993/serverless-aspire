@@ -17,12 +17,19 @@
         <PackageReference Include="Aspire.Hosting.AWS" Version="9.2.5" />
         <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.2.1" />
         <PackageReference Include="AWSSDK.Lambda" Version="4.0.1.2" />
+        <PackageReference Include="Datadog.Trace.Bundle" Version="3.20.0" />
         <PackageReference Include="LocalStack.Client" Version="1.6.0" />
         <PackageReference Include="LocalStack.Client.Extensions" Version="1.4.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ProductAPI\ProductAPI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="cdk-bootstrap.template">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

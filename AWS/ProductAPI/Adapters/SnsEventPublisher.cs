@@ -8,6 +8,7 @@ using System.Text.Json;
 using Amazon.SimpleNotificationService;
 using CloudNative.CloudEvents;
 using CloudNative.CloudEvents.SystemTextJson;
+using Datadog.Trace;
 using Microsoft.Extensions.Configuration;
 using ProductAPI.ProductManagement;
 
@@ -31,6 +32,8 @@ public class SnsEventPublisher(
 
     private async Task PublishAsCloudEvent(string? topicArn, string eventType, object? data)
     {
+        using var publishSpan = Tracer.Instance.StartActive($"publish {eventType}");
+        publishSpan.Span.SetTag("messaging.system", "aws_sns");
         var cloudEvent = new CloudEvent
         {
             Source = new Uri("http://products.dev"),

@@ -6,15 +6,25 @@ using Aspire.Hosting.AWS.DynamoDB;
 using Aspire.Hosting.AWS.Lambda;
 using Projects;
 using Serverless.Aspire.AWS;
+using Serverless.Aspire.AWS.DatadogAspireExtensions;
 using Serverless.Aspire.AWS.Localstack;
 
 #pragma warning disable CA2252 // Opt in to preview features
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var awsConfig = builder.AddAWSSDKConfig()
-    .WithProfile("aspire")
-    .WithRegion(RegionEndpoint.USWest2);
+var options = new DatadogOptionsBuilder(builder.Configuration["DDApiKey"]!)
+    .WithDDSite("datadoghq.eu")
+    .WithServiceName("ProductAPI")
+    .WithAPM()
+    .WithLogs()
+    .WithDogStatsD()
+    .WithProfiling()
+    .WithRuntimeMetrics()
+    .WithOTELEndpoints()
+    .Build();
+
+var datadogContainer = builder.AddDatadog(options);
 
 var localStackOptions = builder.AddLocalStackConfig();
 
@@ -24,26 +34,31 @@ var localStack = builder
 var dynamoDbLocal = builder
     .AddAWSDynamoDBLocal("DynamoDBProducts");
 
+var cdkBootstrapTemplate = Path.Combine(Directory.GetCurrentDirectory(), "cdk-bootstrap.template");
+
+if (!File.Exists(cdkBootstrapTemplate))
+{
+    throw new ArgumentException($"Could not find `{cdkBootstrapTemplate}` template.");
+}
+
 // Bootstrap the CDK environment against LocalStack.
-var cdkBootstrap = builder.AddAWSCloudFormationTemplate("CDKBootstrap", "cdk-bootstrap.template")
+var cdkBootstrap = builder.AddAWSCloudFormationTemplate("CDKBootstrap", cdkBootstrapTemplate)
     .WaitFor(localStack)
-    .WithReference(awsConfig)
     .WithLocalStack(localStackOptions);
 
 var cdkStack = builder.AddAWSCDKStack("ProductCDKStack")
     .WaitFor(localStack)
     .WaitFor(cdkBootstrap)
-    .WithReference(awsConfig)
     .WithLocalStack(localStackOptions);
 var createdTopic = cdkStack.AddSNSTopic("ProductCreatedTopic")
     .AddOutput("ProductCreatedTopicArn", construct => construct.TopicArn);
 var deletedTopic = cdkStack.AddSNSTopic("ProductDeletedTopic")
     .AddOutput("ProductDeletedTopicArn", construct => construct.TopicArn);
 
-var awsResources = builder.AddAWSCloudFormationTemplate("AWSResources", "aws-resources.template")
-    .WaitFor(localStack)
-    .WithReference(awsConfig)
-    .WithLocalStack(localStackOptions);
+// Uncomment the following lines if you want to use a CloudFormation template for AWS resources.
+// var awsResources = builder.AddAWSCloudFormationTemplate("AWSResources", "aws-resources.template")
+//     .WaitFor(localStack)
+//     .WithLocalStack(localStackOptions);
 
 builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (evnt, ct) =>
 {
@@ -73,27 +88,32 @@ builder.Eventing.Subscribe<ResourceReadyEvent>(dynamoDbLocal.Resource, async (ev
     Console.WriteLine($"Table created");
 });
 
-var lambdaCommonReferences = new LambdaCommonReferences(dynamoDbLocal, awsResources, localStack);
+var lambdaCommonReferences = new LambdaCommonReferences(dynamoDbLocal, localStack);
 
 var listProductsLambdaFunction = builder.AddAWSLambdaFunction<ProductAPI>("ListProductsFunction",
         "ProductAPI::ProductAPI.Api_List_Generated::List")
-    .WithCommonReferences(lambdaCommonReferences);
+    .WithCommonReferences(lambdaCommonReferences)
+    .WithEnvironment("DD_TRACE_AGENT_PORT", "8126")
+    .WithDatadog(options);
 
 var getProductLambdaFunction = builder.AddAWSLambdaFunction<ProductAPI>("GetProductFunction",
         "ProductAPI::ProductAPI.Api_Get_Generated::Get")
-    .WithCommonReferences(lambdaCommonReferences);
+    .WithCommonReferences(lambdaCommonReferences)
+    .WithDatadog(options);
 var createProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("CreateProductFunction",
         "ProductAPI::ProductAPI.Api_Create_Generated::Create")
     .WithCommonReferences(lambdaCommonReferences)
     // Example of using CloudFormation resource instead of LocalStack resource.
     //.WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", awsResources.ExtractOutputValueFor("ProductCreatedTopicArn"))
     .WithReference(createdTopic)
-    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", cdkStack.ExtractOutputValueFor("ProductCreatedTopicArn"));
+    .WithEnvironment("PRODUCT_CREATED_TOPIC_ARN", cdkStack.ExtractOutputValueFor("ProductCreatedTopicArn"))
+    .WithDatadog(options);
 var deleteProductFunction = builder.AddAWSLambdaFunction<ProductAPI>("DeleteProductFunction",
         "ProductAPI::ProductAPI.Api_Delete_Generated::Delete")
     .WithCommonReferences(lambdaCommonReferences)
     .WithReference(deletedTopic)
-    .WithEnvironment("PRODUCT_DELETED_TOPIC_ARN", cdkStack.ExtractOutputValueFor("ProductDeletedTopicArn"));
+    .WithEnvironment("PRODUCT_DELETED_TOPIC_ARN", cdkStack.ExtractOutputValueFor("ProductDeletedTopicArn"))
+    .WithDatadog(options);
 
 var lambdaServiceEmulator = builder.Resources.FirstOrDefault(resource => resource.Name == "LambdaServiceEmulator")!;
 
@@ -108,11 +128,13 @@ var productRestockedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("Pro
         new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.v1", "ProductRestockedEventHandler",
             new ProductRestockedTestMessage("testproduct", 100)))
     .WithLambdaTestCommands(lambdaServiceEmulator,
-        new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.invalid.v1", "ProductRestockedEventHandler",
+        new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.invalid.v1",
+            "ProductRestockedEventHandler",
             new ProductRestockedTestMessage(null, 100)))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey")
+    .WithDatadog(options);
 var productPurchasedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("ProductPurchasedEventHandler",
         "ProductAPI::ProductAPI.ProductPurchasedEventHandler_Handle_Generated::Handle")
     .WaitFor(dynamoDbLocal)
@@ -122,7 +144,8 @@ var productPurchasedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("Pro
             new ProductPurchasedTestMessage("testproduct", "ordernumber")))
     .WithEnvironment("PRODUCT_TABLE_NAME", "Products")
     .WithEnvironment("AWS_ACCESS_KEY_ID", "dummyaccesskey")
-    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey");
+    .WithEnvironment("AWS_SECRET_ACCESS_KEY", "dummysecretaccesskey")
+    .WithDatadog(options);
 
 builder.AddAWSAPIGatewayEmulator("APIGatewayEmulator", APIGatewayType.HttpV2)
     .WaitFor(listProductsLambdaFunction)
