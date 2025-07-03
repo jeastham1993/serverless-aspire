@@ -45,7 +45,6 @@ public class SnsEventPublisher(
         var cloudEventJson =
             Encoding.UTF8.GetString(jsonEventFormatter.EncodeStructuredModeMessage(cloudEvent, out _).Span);
 
-        await snsClient.PublishAsync(topicArn,
-            JsonSerializer.Serialize(cloudEventJson));
+        await snsClient.PublishAsync(topicArn, cloudEventJson);
     }
 }
