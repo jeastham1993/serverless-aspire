@@ -76,6 +76,9 @@ var productRestockedEventHandler = builder.AddAWSLambdaFunction<ProductAPI>("Pro
         "ProductAPI::ProductAPI.ProductRestockedEventHandler_Handle_Generated::Handle")
     .WaitFor(dynamoDbLocal)
     .WithReference(dynamoDbLocal)
+    // If you only have a single Lambda function in your project, you'll need to first create the lambda handler
+    // Then retrieve the LambdaServiceEmulator resource from the builder
+    // Then add the test commands passing in the emulator.
     .WithLambdaTestCommands(lambdaServiceEmulator,
         new LambdaTestSqsMessage<ProductRestockedTestMessage>("product.restocked.v1", "ProductRestockedEventHandler",
             new ProductRestockedTestMessage("testproduct", 100)))
